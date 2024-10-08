@@ -1,0 +1,20 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=store
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwe
+    container_name: postgres_db_for_assetStore
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    restart: always
+
+volumes:
+  pgdata:
+    external: false
+    
