@@ -13,5 +13,7 @@ func GetRoutes(storeUseCase *usecase.StoreUseCase) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", h.MainPageForm)
 	mux.HandleFunc("POST /api/auth/register", h.RegisterUser)
+	mux.HandleFunc("POST /api/auth/login", h.LoginUser)
+	mux.HandleFunc("POST /api/auth/add", h.AddAsset)
 	return mux
 }

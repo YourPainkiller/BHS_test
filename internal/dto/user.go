@@ -1,12 +1,12 @@
 package dto
 
 type UserDto struct {
-	UserId       int    `json:"userId" db:"id"`
-	UserName     string `json:"userName" db:"username"`
-	UserPassword string `json:"userPassword" db:"password"`
+	UserId       int    `json:"id" db:"id"`
+	UserName     string `json:"username" db:"username"`
+	UserPassword string `json:"password" db:"password"`
 }
 
-type RegisterUserDto struct {
-	UserName     string `json:"userName"`
-	UserPassword string `json:"userPassword"`
+type AuthUserDto struct {
+	UserName     string `json:"username"`
+	UserPassword string `json:"password"`
 }

@@ -9,6 +9,8 @@ import (
 
 type Facade interface {
 	AddUser(ctx context.Context, req dto.UserDto) error
+	GetUserByUsername(ctx context.Context, username string) (*dto.UserDto, error)
+	AddRefreshSession(ctx context.Context, req dto.RefreshSessionDto) error
 	// GetOrderById(ctx context.Context, id int) (dto.OrderDto, error)
 	// UpdateOrderInfo(ctx context.Context, req dto.OrderDto) error
 	// GetOrdersByUserId(ctx context.Context, userId int) (dto.UserOrdersResponse, error)
@@ -33,7 +35,24 @@ func (s *storageFacade) AddUser(ctx context.Context, req dto.UserDto) error {
 		}
 		return nil
 	})
+}
 
+func (s *storageFacade) GetUserByUsername(ctx context.Context, username string) (*dto.UserDto, error) {
+	user, err := s.pgRepository.GetUserByUsername(ctx, username)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (s *storageFacade) AddRefreshSession(ctx context.Context, req dto.RefreshSessionDto) error {
+	err := s.pgRepository.AddRefreshSession(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // func (s *storageFacade) GetOrderById(ctx context.Context, id int) (dto.OrderDto, error) {

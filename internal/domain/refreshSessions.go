@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"github.com/YourPainkiller/BHS_test/internal/dto"
+)
 
 type RefreshSession struct {
 	userId       int
@@ -8,10 +10,10 @@ type RefreshSession struct {
 	fingerprint  string
 	ip           string
 	expiresIn    int
-	createdAt    time.Time
+	createdAt    string
 }
 
-func NewRefreshSession(userId, expiresIn int, refreshToken, fingerprint, ip string, createdAt time.Time) (*RefreshSession, error) {
+func NewRefreshSession(userId, expiresIn int, refreshToken, fingerprint, ip, createdAt string) (*RefreshSession, error) {
 	rs := RefreshSession{}
 	err := rs.SetUserId(userId)
 	if err != nil {
@@ -78,7 +80,18 @@ func (rs *RefreshSession) SetIp(ip string) error {
 	return nil
 }
 
-func (rs *RefreshSession) SetCreatedAt(createdAt time.Time) error {
+func (rs *RefreshSession) SetCreatedAt(createdAt string) error {
 	rs.createdAt = createdAt
 	return nil
+}
+
+func (rs *RefreshSession) ToDTO() dto.RefreshSessionDto {
+	return dto.RefreshSessionDto{
+		UserId:       rs.userId,
+		RefreshToken: rs.refreshToken,
+		Fingerprint:  rs.fingerprint,
+		Ip:           rs.ip,
+		ExpiresIn:    rs.expiresIn,
+		CreatedAt:    rs.createdAt,
+	}
 }

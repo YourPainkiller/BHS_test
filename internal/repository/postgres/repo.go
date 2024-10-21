@@ -9,8 +9,6 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 )
 
-const sameIdErrorCode = "23505"
-
 type PgRepository struct {
 	txManager TransactionManager
 }
@@ -21,10 +19,34 @@ func NewPgRepository(txManager TransactionManager) *PgRepository {
 
 func (r *PgRepository) AddUser(ctx context.Context, req dto.UserDto) error {
 	tx := r.txManager.GetQueryEngine(ctx)
-
 	_, err := tx.Exec(ctx, `
 	insert into users(username, password) values($1, $2)
 	`, req.UserName, req.UserPassword)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *PgRepository) GetUserByUsername(ctx context.Context, username string) (*dto.UserDto, error) {
+	tx := r.txManager.GetQueryEngine(ctx)
+	user := &dto.UserDto{UserName: username}
+	err := tx.QueryRow(ctx, `
+	select password, id from users where username = $1
+	`, username).Scan(&user.UserPassword, &user.UserId)
+
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
+func (r *PgRepository) AddRefreshSession(ctx context.Context, req dto.RefreshSessionDto) error {
+	tx := r.txManager.GetQueryEngine(ctx)
+	_, err := tx.Exec(ctx, `
+	insert into refreshSessions(user_id, refresh_token, fingerprint, ip, expires_in, created_at) values($1, $2, $3, $4, $5, $6)
+	`, req.UserId, req.RefreshToken, req.Fingerprint, req.Ip, req.ExpiresIn, req.CreatedAt)
 
 	if err != nil {
 		return err
@@ -102,7 +124,7 @@ func (r *PgRepository) AddUser(ctx context.Context, req dto.UserDto) error {
 // 	return nil
 // }
 
-func unwrapPgCode(err error) string {
+func UnwrapPgCode(err error) string {
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
