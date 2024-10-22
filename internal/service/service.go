@@ -1,4 +1,4 @@
-package serivice
+package service
 
 import (
 	"log"

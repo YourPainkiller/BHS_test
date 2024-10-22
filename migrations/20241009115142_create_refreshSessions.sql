@@ -5,8 +5,8 @@ create table if not exists refreshSessions (
     refresh_token text not null,
     fingerprint text not null,
     ip text not null,
-    expires_in int,
-    created_at text not null
+    expires_in timestamp with time zone,
+    created_at timestamp with time zone
 );
 
 -- +goose Down

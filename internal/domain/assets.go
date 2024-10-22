@@ -12,9 +12,9 @@ type Asset struct {
 
 const MAXASSETNAMELEN = 12
 
-func NewAsset(assetId, userId, assetPrice int, assetName, assetDescr string) (*Asset, error) {
+func NewAsset(userId, assetPrice int, assetName, assetDescr string) (*Asset, error) {
 	asset := Asset{}
-	err := asset.SetAssetId(assetId)
+	err := asset.SetAssetId()
 	if err != nil {
 		return nil, err
 	}
@@ -42,11 +42,8 @@ func NewAsset(assetId, userId, assetPrice int, assetName, assetDescr string) (*A
 	return &asset, nil
 }
 
-func (a *Asset) SetAssetId(assetId int) error {
-	if assetId < 1 {
-		return ErrInvalidAssetId
-	}
-	a.assetId = assetId
+func (a *Asset) SetAssetId() error {
+	a.assetId = 0
 	return nil
 }
 
@@ -59,7 +56,7 @@ func (a *Asset) SetUserId(userId int) error {
 }
 
 func (a *Asset) SetAssetPrice(assetPrice int) error {
-	if assetPrice < 0 {
+	if assetPrice < -1 {
 		return ErrInvalidAssetPrice
 	}
 	a.assetPrice = assetPrice

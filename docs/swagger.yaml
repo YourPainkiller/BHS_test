@@ -1,0 +1,211 @@
+consumes:
+- application/json
+definitions:
+  domain.AcceptResponse:
+    properties:
+      detail:
+        example: success
+        type: string
+    type: object
+  domain.ErrorResponse:
+    properties:
+      message:
+        example: error message
+        type: string
+    type: object
+  dto.Add:
+    properties:
+      assetDescr:
+        example: lorem ipsum
+        type: string
+      assetName:
+        example: tree
+        type: string
+      assetPrice:
+        example: 10
+        type: integer
+    type: object
+  dto.Buy:
+    properties:
+      assetName:
+        example: tree
+        type: string
+      count:
+        example: 3
+        type: integer
+    type: object
+  dto.Delete:
+    properties:
+      assetName:
+        example: tree
+        type: string
+    type: object
+  dto.UserCredentials:
+    properties:
+      password:
+        example: yourpassword
+        type: string
+      username:
+        example: yourusername
+        type: string
+    type: object
+host: localhost:4000
+info:
+  contact: {}
+  license:
+    name: xd
+  title: Asset Store API
+  version: "1.0"
+paths:
+  /api/auth/add:
+    post:
+      consumes:
+      - application/json
+      description: Adding asset to store
+      parameters:
+      - description: asset info
+        in: body
+        name: AssetData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Add'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Add asset
+      tags:
+      - asset
+  /api/auth/buy:
+    post:
+      consumes:
+      - application/json
+      description: Buying asset from store
+      parameters:
+      - description: asset name and count
+        in: body
+        name: AssetData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Buy'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Buy asset
+      tags:
+      - asset
+  /api/auth/delete:
+    post:
+      consumes:
+      - application/json
+      description: Deleting asset from store
+      parameters:
+      - description: asset name
+        in: body
+        name: AssetData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Delete'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Delete asset
+      tags:
+      - asset
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: With this command you can login user
+      parameters:
+      - description: your credentils
+        in: body
+        name: UserData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Login user
+      tags:
+      - auth
+  /api/auth/refresh:
+    get:
+      description: Refresh your auth
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Refresh cookie
+      tags:
+      - auth
+  /api/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: With this command you can register user
+      parameters:
+      - description: your credentils
+        in: body
+        name: UserData
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UserCredentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Register user
+      tags:
+      - auth
+produces:
+- application/json
+schemes:
+- http
+swagger: "2.0"

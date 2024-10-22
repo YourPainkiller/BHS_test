@@ -8,11 +8,11 @@ create table if not exists users (
 create table if not exists assets (
     id serial primary key,
     user_id int not null references users(id) on delete cascade,
-    name text CHECK (length(name) > 0),
+    name text,
     descr text,
     price int not null
 );
 
 -- +goose Down
-drop table if exists users;
 drop table if exists assets;
+drop table if exists users;

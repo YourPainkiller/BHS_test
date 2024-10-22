@@ -4,12 +4,18 @@ SHELL := /bin/bash
 PG_URL="postgres://postgres:qwe@localhost:5434/store?sslmode=disable"
 
 
+up:
+	make tidy
+	make compose-up
+	make goose-up
+	make run
+
 check-quality: 
 	make fmt
 	make vet
 
-# cover:
-# 	go test -cover ./internal/usecase
+cover:
+	go test -cover ./internal/usecase
 	
 vet: 
 	go vet ./...
@@ -18,7 +24,7 @@ fmt:
 	go fmt ./...
 
 tidy: 
-	go get -u
+#	go get -u
 	go mod tidy
 
 build:
@@ -28,6 +34,9 @@ build:
 run: 
 	make build
 	$(APP_EXECUTABLE)
+
+gen-swag:
+	swag init -g cmd/app/main.go
 
 # ---------------------------
 # Запуск базы данных в Docker

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/YourPainkiller/BHS_test/internal/domain"
 	"github.com/YourPainkiller/BHS_test/internal/dto"
 
 	"github.com/jackc/pgx/v5/pgconn"
@@ -46,7 +47,7 @@ func (r *PgRepository) AddRefreshSession(ctx context.Context, req dto.RefreshSes
 	tx := r.txManager.GetQueryEngine(ctx)
 	_, err := tx.Exec(ctx, `
 	insert into refreshSessions(user_id, refresh_token, fingerprint, ip, expires_in, created_at) values($1, $2, $3, $4, $5, $6)
-	`, req.UserId, req.RefreshToken, req.Fingerprint, req.Ip, req.ExpiresIn, req.CreatedAt)
+	`, req.UserId, req.RefreshToken, req.Fingerprint, req.Ip, req.Expires, req.CreatedAt)
 
 	if err != nil {
 		return err
@@ -54,75 +55,66 @@ func (r *PgRepository) AddRefreshSession(ctx context.Context, req dto.RefreshSes
 	return nil
 }
 
-// func (r *PgRepository) GetOrderById(ctx context.Context, id int) (dto.OrderDto, error) {
-// 	tx := r.txManager.GetQueryEngine(ctx)
-// 	var order dto.OrderDto
+func (r *PgRepository) AddAsset(ctx context.Context, req dto.AssetDto) error {
+	tx := r.txManager.GetQueryEngine(ctx)
+	_, err := tx.Exec(ctx, `
+	insert into assets(user_id, name, descr, price) values($1, $2, $3, $4)
+	`, req.UserId, req.AssetName, req.AssetDescr, req.AssetPrice)
 
-// 	err := tx.QueryRow(ctx, `
-// 	select order_id, user_id, valid_time, order_state, price, weight, package, additional_stretch from orders where order_id = $1
-// 	`, id).Scan(&order.Id, &order.UserId, &order.ValidTime, &order.State, &order.Price, &order.Weight, &order.PackageType, &order.AdditionalStretch)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-// 	if errors.Is(err, pgx.ErrNoRows) {
+func (r *PgRepository) DeleteAsset(ctx context.Context, req dto.DeleteAssetDto) error {
+	tx := r.txManager.GetQueryEngine(ctx)
+	x, err := tx.Exec(ctx, `
+	update assets set price = -1 where user_id = $1 and name = $2
+	`, req.UserId, req.AssetName)
+	if err != nil {
+		return err
+	}
+	if x.RowsAffected() == 0 {
+		return domain.ErrNoSuchAsset
+	}
+	return nil
+}
 
-// 		return dto.OrderDto{}, fmt.Errorf("no such order with id=%d", id)
-// 	}
-// 	if err != nil {
-// 		return dto.OrderDto{}, err
-// 	}
+func (r *PgRepository) GetAssetInfo(ctx context.Context, assetName string) (*dto.AssetDto, error) {
+	var asset dto.AssetDto
+	tx := r.txManager.GetQueryEngine(ctx)
+	err := tx.QueryRow(ctx, `
+	select id, user_id, price from assets where name = $1 and price != -1
+	`, assetName).Scan(&asset.AssetId, &asset.UserId, &asset.AssetPrice)
 
-// 	return order, nil
-// }
+	if err != nil {
+		return nil, err
+	}
+	return &asset, nil
+}
 
-// func (r *PgRepository) UpdateOrderInfo(ctx context.Context, req dto.OrderDto) error {
-// 	tx := r.txManager.GetQueryEngine(ctx)
+func (r *PgRepository) Refresh(ctx context.Context, req dto.UpdateRefreshDto) error {
+	tx := r.txManager.GetQueryEngine(ctx)
+	var check bool
+	err := tx.QueryRow(ctx, `
+	select exists (select 1 from refreshSessions WHERE user_id = $1 and refresh_token = $2)
+	`, req.UserId, req.PriviousRefresh).Scan(&check)
+	if err != nil {
+		return err
+	}
+	if !check {
+		return domain.ErrNoSuchSession
+	}
 
-// 	_, err := tx.Exec(ctx, `
-// 	update orders set valid_time = $1, order_state = $2 where order_id = $3
-// 	`, req.ValidTime, req.State, req.Id)
-
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func (r *PgRepository) GetOrdersByUserId(ctx context.Context, userId int) (dto.UserOrdersResponse, error) {
-// 	var orders []dto.OrderDto
-// 	tx := r.txManager.GetQueryEngine(ctx)
-
-// 	err := pgxscan.Select(ctx, tx, &orders, `
-// 	select order_id, user_id, valid_time, order_state, price, weight, package, additional_stretch from orders where user_id = $1 and order_state != 'deleted'
-// 	`, userId)
-// 	if err != nil {
-// 		return dto.UserOrdersResponse{}, err
-// 	}
-// 	return dto.UserOrdersResponse{ListOrdersDto: dto.ListOrdersDto{Orders: orders}}, nil
-// }
-
-// func (r *PgRepository) GetUserReturns(ctx context.Context) (dto.UserReturnsResponse, error) {
-// 	var orders []dto.OrderDto
-// 	tx := r.txManager.GetQueryEngine(ctx)
-
-// 	err := pgxscan.Select(ctx, tx, &orders, `
-// 	select order_id, user_id, valid_time, order_state, price, weight, package, additional_stretch from orders where order_state = 'returned'
-// 	`)
-// 	if err != nil {
-// 		return dto.UserReturnsResponse{}, err
-// 	}
-// 	return dto.UserReturnsResponse{ListOrdersDto: dto.ListOrdersDto{Orders: orders}}, nil
-// }
-
-// func (r *PgRepository) DropTable(ctx context.Context) error {
-// 	tx := r.txManager.GetQueryEngine(ctx)
-// 	_, err := tx.Exec(ctx, `
-// 	truncate table orders`)
-
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
+	_, err = tx.Exec(ctx, `
+	update refreshSessions set refresh_token = $1 where user_id = $2 and refresh_token = $3
+	`, req.RefreshToken, req.UserId, req.PriviousRefresh)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 func UnwrapPgCode(err error) string {
 	if err != nil {
