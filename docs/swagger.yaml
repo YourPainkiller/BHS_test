@@ -161,6 +161,23 @@ paths:
       summary: Login user
       tags:
       - auth
+  /api/auth/logout:
+    get:
+      description: Logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.AcceptResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.ErrorResponse'
+      summary: Logout
+      tags:
+      - auth
   /api/auth/refresh:
     get:
       description: Refresh your auth

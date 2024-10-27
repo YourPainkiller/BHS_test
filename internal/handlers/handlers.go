@@ -449,3 +449,30 @@ func (h *Handlers) RefreshSession(w http.ResponseWriter, r *http.Request) {
 
 	SendJson(w, map[string]string{"detail": "successed"}, http.StatusOK)
 }
+
+// Logout godoc
+// @Summary		Logout
+// @Description	Logout
+// @Produce		json
+// @Tags auth
+// @Success		200	{object}	domain.AcceptResponse
+// @Failure		400	{object}	domain.ErrorResponse
+// @Router			/api/auth/logout [get]
+func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name:   "accessToken",
+		Value:  "",
+		Path:   "/api/auth",
+		MaxAge: -1,
+	}
+	http.SetCookie(w, cookie)
+
+	cookie = &http.Cookie{
+		Name:   "refreshToken",
+		Value:  "",
+		Path:   "/api/auth",
+		MaxAge: -1,
+	}
+	http.SetCookie(w, cookie)
+	SendJson(w, map[string]string{"detail": "successed"}, http.StatusOK)
+}

@@ -19,6 +19,7 @@ func GetRoutes(storeUseCase *usecase.StoreUseCase) *http.ServeMux {
 	mux.HandleFunc("POST /api/auth/delete", h.DeleteAsset)
 	mux.HandleFunc("POST /api/auth/buy", h.BuyAsset)
 	mux.HandleFunc("GET /api/auth/refresh", h.RefreshSession)
+	mux.HandleFunc("GET /api/auth/logout", h.Logout)
 	mux.HandleFunc("GET /swagger-ui", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		b, _ := os.ReadFile("./internal/service/static/index.html")
